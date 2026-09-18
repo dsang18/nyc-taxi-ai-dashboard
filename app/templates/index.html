@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>NYC Taxi AI Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js"></script>
+```
+
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+```
+<!-- Header -->
+<header class="bg-gray-900 text-white px-6 py-3">
+    <h1 class="text-xl font-bold">
+        NYC Taxi Analytics Dashboard
+    </h1>
+
+    <p class="text-gray-400 text-xs mt-1">
+        May 2026 Yellow Taxi Trip Analysis
+    </p>
+</header>
+
+
+<!-- Dashboard -->
+<main class="p-4">
+
+    <!-- Filters -->
+    <section class="w-full flex items-center justify-start gap-2 bg-white rounded-lg shadow-sm p-4 mb-4">
+        <div class="w-1/5">
+            <label
+                for="start-date"
+                class="block text-xs text-gray-500 mb-1"
+            >
+                From
+            </label>
+
+            <input
+                type="date"
+                id="start-date"
+                class="filters w-full border rounded px-3 py-2 text-sm"
+            >
+        </div>
+
+        <div class="w-1/5">
+            <label
+                for="end-date"
+                class="block text-xs text-gray-500 mb-1"
+            >
+                To
+            </label>
+
+            <input
+                type="date"
+                id="end-date"
+                class="filters w-full border rounded px-3 py-2 text-sm"
+            >
+        </div>
+
+        <div class="w-1/5">
+            <label
+                for="payment-type"
+                class="block text-xs text-gray-500 mb-1"
+            >
+                Payment Type
+            </label>
+
+            <select
+                id="payment-type"
+                class="filters w-full border rounded px-3 py-2 text-sm"
+            >
+                <option value="">All</option>
+            </select>
+        </div>
+
+        <div class="w-1/5">
+            <label
+                for="pickup-zone"
+                class="block text-xs text-gray-500 mb-1"
+            >
+                Pickup Zone
+            </label>
+
+            <select
+                id="pickup-zone"
+                class="filters w-full border rounded px-3 py-2 text-sm"
+            >
+                <option value="">All</option>
+            </select>
+        </div>
+
+        <div class="w-1/5">
+            <label
+                for="dropoff-zone"
+                class="block text-xs text-gray-500 mb-1"
+            >
+                Dropoff Zone
+            </label>
+
+            <select
+                id="dropoff-zone"
+                class="filters w-full border rounded px-3 py-2 text-sm"
+            >
+                <option value="">All</option>
+            </select>
+        </div>
+
+        <div>
+            <label
+                for="reset-filters"
+                class="block text-xs text-white mb-1"
+            >
+            Reset Filters
+            </label>
+            <button
+                id="reset-filters"
+                class="size-full bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm"
+            >
+                Reset
+            </button>
+        </div>
+    </section>
+
+    <!-- KPI Cards -->
+    <section id="kpi-container" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+
+        <div class="bg-white rounded-lg shadow-sm px-4 py-3">
+            <p class="text-gray-500 text-xs">Total Trips</p>
+            <h2 id="total-trips"
+                class="text-2xl font-bold mt-1">
+                -
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm px-4 py-3">
+            <p class="text-gray-500 text-xs">Total Revenue</p>
+            <h2 id="total-revenue"
+                class="text-2xl font-bold mt-1">
+                -
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm px-4 py-3">
+            <p class="text-gray-500 text-xs">Avg Trip Amount</p>
+            <h2 id="avg-trip-amount"
+                class="text-2xl font-bold mt-1">
+                -
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm px-4 py-3">
+            <p class="text-gray-500 text-xs">Avg Trip Distance</p>
+            <h2 id="avg-trip-distance"
+                class="text-2xl font-bold mt-1">
+                -
+            </h2>
+        </div>
+
+    </section>
+
+
+    <!-- Charts -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <!-- Trips by Hour -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+
+            <h2 class="text-sm font-semibold mb-2">
+                Trips by Hour
+            </h2>
+
+            <div id="trips-by-hour"
+                 class="w-full h-80">
+            </div>
+
+        </div>
+
+
+        <!-- Trips by Day -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+
+            <h2 class="text-sm font-semibold mb-2">
+                Trips by Day
+            </h2>
+
+            <div id="trips-by-day"
+                 class="w-full h-80">
+            </div>
+
+        </div>
+
+
+        <!-- Payment Analysis -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+
+            <h2 class="text-sm font-semibold mb-2">
+                Payment Analysis
+            </h2>
+
+            <div id="payment-analysis"
+                 class="w-full h-80">
+            </div>
+
+        </div>
+
+
+        <!-- Revenue By Day -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+
+            <h2 class="text-sm font-semibold mb-2">
+                Revenue By Day
+            </h2>
+
+            <div id="revenue-by-day"
+                 class="w-full h-80">
+            </div>
+
+        </div>
+
+        <!-- Revenue By Day -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+
+            <h2 class="text-sm font-semibold mb-2">
+                Revenue By Hour
+            </h2>
+
+            <div id="revenue-by-hour"
+                 class="w-full h-80">
+            </div>
+
+        </div>
+        
+        <!--Average Revenue By Hour  -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <h2 class="text-sm font-semibold mb-2">Average Revenue by Hour</h2>
+            <div id="avg-revenue-by-hour" class="w-full h-80"></div>
+        </div>
+
+        <!-- Top 10 Pickup/Dropoff Zones by Revenue -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <!-- Toggle Buttons -->
+            <div class="flex items-center justify-between mb-2">
+                <h2 id="zone-chart-title" class="text-sm font-semibold">
+                    Top 10 Pickup Zones by Revenue
+                </h2>
+
+                <div class="flex gap-1">
+                    <button id="pickup-zone-btn" class="px-3 py-1 text-xs rounded bg-gray-900 text-white" >
+                        Pickup Zone
+                    </button>
+
+                    <button id="dropoff-zone-btn" class="px-3 py-1 text-xs rounded bg-gray-200 text-gray-700" >
+                        Dropoff Zone
+                    </button>
+                </div>
+            </div>
+
+            <div id="zone-revenue-chart" class="w-full h-64"></div>
+
+        </div>
+    </section>
+
+</main>
+
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+```
+
+</body>
+</html>
