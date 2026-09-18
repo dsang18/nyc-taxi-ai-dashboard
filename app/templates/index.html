@@ -32,6 +32,83 @@
 <!-- Dashboard -->
 <main class="p-4">
 
+    <!-- AI Insights -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+
+        <div class="flex items-center justify-between mb-3">
+
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🤖</span>
+
+                    <h2 class="text-sm font-semibold text-gray-900">
+                        AI Insights
+                    </h2>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-1">
+                    AI-generated analysis based on the current filters
+                </p>
+            </div>
+
+            <button
+                id="refresh-ai-insights"
+                class="px-3 py-1 text-xs rounded bg-gray-900 text-white hover:bg-gray-700"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div
+            id="ai-insights-content"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"
+        >
+            <div class="text-sm text-gray-500">
+                Loading AI insights...
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Anomaly Detection -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+
+        <div class="flex items-center justify-between mb-3">
+
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🚨</span>
+
+                    <h2 class="text-sm font-semibold text-gray-900">
+                        AI Anomaly Detection
+                    </h2>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-1">
+                    Statistically detected unusual demand patterns
+                </p>
+            </div>
+
+            <button
+                id="refresh-ai-anomalies"
+                class="px-3 py-1 text-xs rounded bg-gray-900 text-white hover:bg-gray-700"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div id="ai-anomalies-content">
+
+            <div class="text-sm text-gray-500">
+                Detecting anomalies...
+            </div>
+
+        </div>
+
+    </div>
+    
     <!-- Filters -->
     <section class="w-full flex items-center justify-start gap-2 bg-white rounded-lg shadow-sm p-4 mb-4">
         <div class="w-1/5">

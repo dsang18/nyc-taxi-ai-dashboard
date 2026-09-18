@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request
 
 from app.services.taxi_services import get_kpis, get_trips_by_hour, get_trips_by_day, get_payment_analysis, get_top_locations, get_revenue_by_day, get_revenue_by_hour, get_avg_revenue_by_hour, get_revenue_by_pickup_zone, get_revenue_by_dropoff_zone, get_filter_options
 
+from app.services.ai_services import get_dashboard_insights, get_ai_anomalies
+
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -162,3 +164,39 @@ def revenue_by_dropoff_zone():
             payment_type=payment_type,
             pickup_zone=pickup_zone,
             dropoff_zone=dropoff_zone))
+
+
+@api.route("/ai-insights")
+def ai_insights():
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    payment_type = request.args.get("payment_type")
+    pickup_zone = request.args.get("pickup_zone")
+    dropoff_zone = request.args.get("dropoff_zone")
+
+    insights = get_dashboard_insights(start_date=start_date,
+                end_date=end_date,
+                payment_type=payment_type,
+                pickup_zone=pickup_zone,
+                dropoff_zone=dropoff_zone)
+
+    return jsonify({
+        "insights": insights
+    })
+
+@api.route("/ai-anomalies")
+def ai_anomalies():
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    payment_type = request.args.get("payment_type")
+    pickup_zone = request.args.get("pickup_zone")
+    dropoff_zone = request.args.get("dropoff_zone")
+
+    result = get_ai_anomalies(start_date=start_date,
+                end_date=end_date,
+                payment_type=payment_type,
+                pickup_zone=pickup_zone,
+                dropoff_zone=dropoff_zone)
+
+    return jsonify(result)
+

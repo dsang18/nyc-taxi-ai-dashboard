@@ -580,6 +580,315 @@ async function loadZoneRevenue(type) {
     chart.setOption(option);
 }
 
+async function loadAIInsights() {
+    const container = document.getElementById("ai-insights-content");
+
+    container.innerHTML = `
+        <div class="text-sm text-gray-500">
+            Generating AI insights...
+        </div>
+    `;
+
+    try {
+        const data = await fetchWithFilters("/api/ai-insights");
+
+        const insights = data.insights
+            .split("\n")
+            .filter(line => line.trim());
+
+        const categoryStyles = {
+            Demand: {
+                icon: "📈",
+                label: "Demand"
+            },
+            Revenue: {
+                icon: "💰",
+                label: "Revenue"
+            },
+            Payment: {
+                icon: "💳",
+                label: "Payment"
+            },
+            Location: {
+                icon: "📍",
+                label: "Location"
+            }
+        };
+
+        container.innerHTML = insights.map(insight => {
+
+            const separatorIndex = insight.indexOf(":");
+
+            if (separatorIndex === -1) {
+                return `
+                    <div class="text-sm text-gray-700">
+                        ${insight}
+                    </div>
+                `;
+            }
+
+            const category = insight
+                .substring(0, separatorIndex)
+                .trim();
+
+            const message = insight
+                .substring(separatorIndex + 1)
+                .trim();
+
+            const style = categoryStyles[category] || {
+                icon: "🤖",
+                label: category
+            };
+
+            return `
+                <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-base">
+                            ${style.icon}
+                        </span>
+
+                        <span class="text-xs font-semibold text-gray-500 uppercase">
+                            ${style.label}
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-gray-800">
+                        ${message}
+                    </p>
+
+                </div>
+            `;
+        }).join("");
+
+    } catch (error) {
+
+        console.error("AI Insights Error:", error);
+
+        container.innerHTML = `
+            <div class="text-sm text-red-500">
+                Unable to generate AI insights.
+            </div>
+        `;
+    }
+}
+
+async function loadAIAnomalies() {
+
+    const container = document.getElementById(
+        "ai-anomalies-content"
+    );
+
+    container.innerHTML = `
+        <div class="text-sm text-gray-500">
+            Analyzing demand, revenue and distance patterns...
+        </div>
+    `;
+
+    try {
+
+        const data = await fetchWithFilters(
+            "/api/ai-anomalies"
+        );
+
+        const categories = [
+            {
+                key: "demand",
+                icon: "📈",
+                title: "Demand",
+                valueKey: "trip_count",
+                unit: "trips"
+            },
+            {
+                key: "revenue",
+                icon: "💰",
+                title: "Revenue",
+                valueKey: "revenue",
+                unit: "revenue"
+            },
+            {
+                key: "distance",
+                icon: "📏",
+                title: "Trip Distance",
+                valueKey: "avg_distance",
+                unit: "miles"
+            }
+        ];
+
+        let cards = "";
+
+        categories.forEach(category => {
+
+            const anomalies =
+                data.anomalies[category.key] || [];
+
+            anomalies.forEach(anomaly => {
+
+                const isHigh =
+                    anomaly.type === "high";
+
+                const direction = isHigh ? "↑" : "↓";
+
+                const label = isHigh
+                    ? "Unusually High"
+                    : "Unusually Low";
+
+                let period = "";
+
+                if (category.key === "revenue") {
+                    period = anomaly.date;
+                } else {
+                    period =
+                        `${String(anomaly.hour).padStart(2, "0")}:00`;
+                }
+
+                let value = anomaly[category.valueKey];
+
+                if (category.key === "revenue") {
+                    value =
+                        "$" + Number(value).toLocaleString(
+                            undefined,
+                            {
+                                maximumFractionDigits: 0
+                            }
+                        );
+                } else if (
+                    category.key === "distance"
+                ) {
+                    value =
+                        Number(value).toFixed(2);
+                } else {
+                    value =
+                        Number(value).toLocaleString();
+                }
+
+                cards += `
+                    <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+
+                        <div class="flex items-center justify-between">
+
+                            <div>
+
+                                <div class="flex items-center gap-2">
+
+                                    <span class="text-lg">
+                                        ${category.icon}
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-500 uppercase">
+                                        ${category.title}
+                                    </span>
+
+                                </div>
+
+                                <p class="text-sm font-semibold text-gray-800 mt-1">
+                                    ${period}
+                                </p>
+
+                            </div>
+
+                            <div class="text-right">
+
+                                <span class="text-lg">
+                                    ${direction}
+                                </span>
+
+                                <p class="text-xs font-medium text-gray-500">
+                                    ${label}
+                                </p>
+
+                                <p class="text-sm font-semibold text-gray-800">
+                                    ${value}
+                                    ${category.unit !== "revenue"
+                                        ? " " + category.unit
+                                        : ""}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+        });
+
+        if (!cards) {
+
+            container.innerHTML = `
+                <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+                    <div class="flex items-center gap-2">
+                        <span>✓</span>
+                        <span class="text-sm font-medium text-gray-700">
+                            No significant anomalies detected
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Demand, revenue and trip distance are
+                        within their expected statistical ranges.
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML = `
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${cards}
+            </div>
+
+            <div class="mt-3 border border-gray-100 rounded-lg p-3 bg-gray-50">
+
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">
+                    AI Analysis
+                </p>
+
+                <div class="text-sm text-gray-700 leading-relaxed">
+                    ${data.explanation}
+                </div>
+
+            </div>
+        `;
+        
+    } catch (error) {
+
+        console.error(
+            "AI Anomaly Detection Error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="text-sm text-red-500">
+                Unable to detect anomalies.
+            </div>
+        `;
+    }
+}
+
+async function refreshDashboard() {
+
+    await Promise.all([
+        loadKPIs(),
+        loadTripsByHour(),
+        loadTripsByDay(),
+        loadPaymentStatus(),
+        loadRevenueByDay(),
+        loadRevenueByHour(),
+        loadAvgRevenueByHour(),
+        loadZoneRevenue("pickup"),
+        loadAIInsights(),
+        loadAIAnomalies()
+    ]);
+}
+
+async function initializeDashboard() {
+    await loadFilterOptions();
+    await refreshDashboard();
+}
+
 document
     .getElementById("pickup-zone-btn")
     .addEventListener("click", function () {
@@ -638,24 +947,20 @@ document
         refreshDashboard();
     });
 
-async function refreshDashboard() {
+document
+    .getElementById("refresh-ai-insights")
+    .addEventListener(
+        "click",
+        loadAIAnomalies
+    );
 
-    await Promise.all([
-        loadKPIs(),
-        loadTripsByHour(),
-        loadTripsByDay(),
-        loadPaymentStatus(),
-        loadRevenueByDay(),
-        loadRevenueByHour(),
-        loadAvgRevenueByHour(),
-        loadZoneRevenue("pickup")
-    ]);
-}
+document
+    .getElementById("refresh-ai-anomalies")
+    .addEventListener(
+        "click",
+        loadAIAnomalies
+    );
 
-async function initializeDashboard() {
-    await loadFilterOptions();
-    await refreshDashboard();
-}
 
 initializeDashboard();
 loadKPIs();
@@ -666,3 +971,5 @@ loadRevenueByDay();
 loadRevenueByHour();
 loadAvgRevenueByHour();
 loadZoneRevenue("pickup");
+loadAIInsights();
+loadAIAnomalies();
